@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+
+  <div class="header">
+    <div class="title">
+      <div class="hello">Olá, {{ session.usuario }}</div>
+      <h1>Nova OS</h1>
+    </div>
+
+    <div class="actions">
+      <a class="btn btn-ghost" href="{{ url_for('painel') }}">Voltar</a>
+      <a class="btn btn-red" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px;">
+    <form method="post">
+
+      <div class="section" style="margin-top:0;">
+        <div class="count">Dados do Cliente</div>
+      </div>
+
+      <div class="form">
+        <div>
+          <label>Nome</label>
+          <input name="cliente_nome" required>
+        </div>
+
+        <div>
+          <label>Telefone</label>
+          <input name="cliente_fone" placeholder="(55) 99999-9999">
+        </div>
+
+        <div>
+          <label>CPF</label>
+          <input name="cliente_cpf" placeholder="Opcional">
+        </div>
+
+        <div>
+          <label>E-mail</label>
+          <input name="cliente_email" placeholder="Opcional">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Endereço</label>
+          <input name="cliente_endereco" placeholder="Opcional">
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Equipamento</div>
+      </div>
+
+      <div class="form">
+        <div>
+          <label>Tipo de equipamento</label>
+          <select name="tipo" id="tipo_select" required class="dark-select">
+            <option value="">Selecione...</option>
+
+            <optgroup label="Celulares e Tablets">
+              <option value="Celular">Celular</option>
+              <option value="Tablet">Tablet</option>
+              <option value="iPhone">iPhone</option>
+              <option value="iPad">iPad</option>
+            </optgroup>
+
+            <optgroup label="Computadores">
+              <option value="Notebook">Notebook</option>
+              <option value="Computador">Computador</option>
+              <option value="All-in-One">All-in-One</option>
+            </optgroup>
+
+            <optgroup label="TV / Vídeo / Som">
+              <option value="TV">TV</option>
+              <option value="Monitor">Monitor</option>
+              <option value="Soundbar">Soundbar</option>
+              <option value="Caixa de Som">Caixa de Som</option>
+              <option value="Home Theater">Home Theater</option>
+            </optgroup>
+
+            <optgroup label="Games / Rede / Outros">
+              <option value="Videogame">Videogame</option>
+              <option value="Roteador">Roteador</option>
+              <option value="Impressora">Impressora</option>
+              <option value="Micro-ondas">Micro-ondas</option>
+              <option value="Aquecedor">Aquecedor</option>
+              <option value="Outro">Outro</option>
+            </optgroup>
+
+          </select>
+        </div>
+
+        <div>
+          <label>Modelo / Equipamento</label>
+          <input name="equipamento" required placeholder="Ex: Samsung A06 / LG 55 / HP i5...">
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Campos específicos (aparecem conforme o tipo)</div>
+        <div class="muted">Preencha o que conseguir no recebimento — ajuda a evitar dúvidas depois.</div>
+      </div>
+
+      <!-- CELULAR / TABLET / IPHONE / IPAD -->
+      <div id="box_celular" class="card" style="display:none; margin-top:10px;">
+        <div class="section" style="margin-top:0;">
+          <div class="count">Checklist Celular / Tablet</div>
+        </div>
+
+        <div class="form">
+
+          <div>
+            <label>Estado da tela</label>
+            <select name="ck_cel_tela_estado" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Boa">Boa</option>
+              <option value="Riscada">Riscada</option>
+              <option value="Trincada">Trincada</option>
+              <option value="Quebrada">Quebrada</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Tela quebrada?</label>
+            <select name="ck_cel_tela_quebrada" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Não">Não</option>
+              <option value="Sim">Sim</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Touch funcionando?</label>
+            <select name="ck_cel_touch" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+              <option value="Intermitente">Intermitente</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Imagem/Display</label>
+            <select name="ck_cel_display" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Manchas">Manchas</option>
+              <option value="Sem imagem">Sem imagem</option>
+              <option value="Piscando">Piscando</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Aparelho liga?</label>
+            <select name="ck_cel_liga" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+              <option value="Não verificado">Não verificado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Carrega?</label>
+            <select name="ck_cel_carrega" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+              <option value="Intermitente">Intermitente</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Percentual aproximado de bateria</label>
+            <select name="ck_cel_bateria_pct" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="0-10%">0-10%</option>
+              <option value="11-30%">11-30%</option>
+              <option value="31-60%">31-60%</option>
+              <option value="61-100%">61-100%</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Botão Power</label>
+            <select name="ck_cel_power" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Falhando">Falhando</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Botões volume</label>
+            <select name="ck_cel_volume" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Falhando">Falhando</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Vibração</label>
+            <select name="ck_cel_vibracao" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Não vibra">Não vibra</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Wi-Fi</label>
+            <select name="ck_cel_wifi" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Não conecta">Não conecta</option>
+              <option value="Intermitente">Intermitente</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Bluetooth</label>
+            <select name="ck_cel_bluetooth" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Não funciona">Não funciona</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Chip (SIM)</label>
+            <select name="ck_cel_chip" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+              <option value="Não verificado">Não verificado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Gaveta do chip</label>
+            <select name="ck_cel_gaveta" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Ausente">Ausente</option>
+              <option value="Danificada">Danificada</option>
+              <option value="Não verificado">Não verificado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>IMEI 1</label>
+            <input name="ck_cel_imei1" placeholder="Opcional">
+          </div>
+
+          <div>
+            <label>IMEI 2</label>
+            <input name="ck_cel_imei2" placeholder="Opcional">
+          </div>
+
+          <div>
+            <label>Câmera frontal</label>
+            <select name="ck_cel_cam_frontal" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com defeito">Com defeito</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Câmera traseira</label>
+            <select name="ck_cel_cam_traseira" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com defeito">Com defeito</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Flash</label>
+            <select name="ck_cel_flash" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Não funciona">Não funciona</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Áudio / alto-falante</label>
+            <select name="ck_cel_audio" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Baixo">Baixo</option>
+              <option value="Rouco">Rouco</option>
+              <option value="Mudo">Mudo</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Microfone</label>
+            <select name="ck_cel_microfone" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Ruim">Ruim</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Conector de carga</label>
+            <select name="ck_cel_conector" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com folga">Com folga</option>
+              <option value="Oxidado">Oxidado</option>
+              <option value="Com defeito">Com defeito</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Molhou / oxidou?</label>
+            <select name="ck_cel_agua" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Não">Não</option>
+              <option value="Sim (relato)">Sim (relato)</option>
+              <option value="Sim (confirmado)">Sim (confirmado)</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Biometria / Face ID</label>
+            <select name="ck_cel_biometria" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com defeito">Com defeito</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Sensor de proximidade</label>
+            <select name="ck_cel_proximidade" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com defeito">Com defeito</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Conta Google/iCloud vinculada?</label>
+            <select name="ck_cel_conta" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Não">Não</option>
+              <option value="Sim">Sim</option>
+              <option value="Não sei">Não sei</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Senha / padrão (se cliente quiser informar)</label>
+            <input name="ck_cel_senha" placeholder="Opcional">
+          </div>
+
+          <div>
+            <label>Carcaça / laterais</label>
+            <select name="ck_cel_carcaca" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sem danos">Sem danos</option>
+              <option value="Arranhado">Arranhado</option>
+              <option value="Amassado">Amassado</option>
+              <option value="Quebrado">Quebrado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Tampa traseira</label>
+            <select name="ck_cel_tampa" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Solta">Solta</option>
+              <option value="Quebrada">Quebrada</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Película / capa</label>
+            <select name="ck_cel_pelicula_capa" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com película">Com película</option>
+              <option value="Sem película">Sem película</option>
+              <option value="Com capa">Com capa</option>
+              <option value="Sem capa">Sem capa</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Cartão de memória</label>
+            <select name="ck_cel_sd" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+              <option value="Não verificado">Não verificado</option>
+            </select>
+          </div>
+
+          <div style="grid-column:1/-1;">
+            <label>Acessórios recebidos</label>
+            <input name="ck_cel_acessorios" placeholder="cabo, capinha, carregador, película...">
+          </div>
+
+          <div style="grid-column:1/-1;">
+            <label>Observações do recebimento (externo)</label>
+            <input name="ck_cel_obs_receb" placeholder="Ex: aparelho entregue sem chip, com tela trincada no canto...">
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NOTEBOOK / COMPUTADOR / AIO -->
+      <div id="box_pc" class="card" style="display:none; margin-top:10px;">
+        <div class="section" style="margin-top:0;">
+          <div class="count">Checklist Computador / Notebook</div>
+        </div>
+
+        <div class="form">
+          <div>
+            <label>Fonte</label>
+            <select name="ck_pc_fonte" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com fonte">Com fonte</option>
+              <option value="Sem fonte">Sem fonte</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Bateria (notebook)</label>
+            <select name="ck_pc_bateria" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Viciada">Viciada</option>
+              <option value="Sem bateria">Sem bateria</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </select>
+          </div>
+
+          <div>
+            <label>HD/SSD</label>
+            <select name="ck_pc_hdssd" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="HD">HD</option>
+              <option value="SSD">SSD</option>
+              <option value="Não verificado">Não verificado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Estado do teclado</label>
+            <select name="ck_pc_teclado" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Falhando">Falhando</option>
+              <option value="Não testado">Não testado</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Estado da tela (notebook)</label>
+            <select name="ck_pc_tela" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Riscada">Riscada</option>
+              <option value="Trincada">Trincada</option>
+              <option value="Sem imagem">Sem imagem</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Senha (Windows/BIOS) se houver</label>
+            <input name="ck_pc_senha" placeholder="Opcional">
+          </div>
+
+          <div style="grid-column:1/-1;">
+            <label>Acessórios recebidos</label>
+            <input name="ck_pc_acessorios" placeholder="fonte, mouse, bolsa, cabo HDMI...">
+          </div>
+        </div>
+      </div>
+
+      <!-- TV / MONITOR -->
+      <div id="box_tv" class="card" style="display:none; margin-top:10px;">
+        <div class="section" style="margin-top:0;">
+          <div class="count">Checklist TV / Monitor</div>
+        </div>
+
+        <div class="form">
+          <div>
+            <label>Polegadas</label>
+            <input name="ck_tv_polegadas" placeholder="Ex: 55">
+          </div>
+
+          <div>
+            <label>Controle</label>
+            <select name="ck_tv_controle" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com controle">Com controle</option>
+              <option value="Sem controle">Sem controle</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Cabo / fonte</label>
+            <select name="ck_tv_fonte" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com cabo">Com cabo</option>
+              <option value="Sem cabo">Sem cabo</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Tela trincada?</label>
+            <select name="ck_tv_tela_trincada" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sim">Sim</option>
+              <option value="Não">Não</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Base / suporte</label>
+            <select name="ck_tv_base" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com base">Com base</option>
+              <option value="Sem base">Sem base</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Cabos adicionais</label>
+            <input name="ck_tv_cabos" placeholder="HDMI, antena, etc. (opcional)">
+          </div>
+        </div>
+      </div>
+
+      <!-- VIDEOGAME -->
+      <div id="box_game" class="card" style="display:none; margin-top:10px;">
+        <div class="section" style="margin-top:0;">
+          <div class="count">Checklist Videogame</div>
+        </div>
+
+        <div class="form">
+          <div>
+            <label>Controles</label>
+            <select name="ck_vg_controles" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Com controle(s)">Com controle(s)</option>
+              <option value="Sem controle">Sem controle</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Cabos</label>
+            <input name="ck_vg_cabos" placeholder="HDMI, fonte, etc.">
+          </div>
+
+          <div>
+            <label>Leitor de disco</label>
+            <select name="ck_vg_leitor" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Ok">Ok</option>
+              <option value="Com defeito">Com defeito</option>
+              <option value="Não se aplica">Não se aplica</option>
+            </select>
+          </div>
+
+          <div>
+            <label>Conta / senha</label>
+            <input name="ck_vg_conta" placeholder="Opcional">
+          </div>
+        </div>
+      </div>
+
+      <!-- IMPRESSORA / ROTEADOR / MICRO / AQUECEDOR / OUTRO -->
+      <div id="box_outros" class="card" style="display:none; margin-top:10px;">
+        <div class="section" style="margin-top:0;">
+          <div class="count">Checklist (outros equipamentos)</div>
+        </div>
+
+        <div class="form">
+          <div>
+            <label>Acessórios recebidos</label>
+            <input name="ck_outro_acessorios" placeholder="fonte, cabos, controle, etc.">
+          </div>
+
+          <div>
+            <label>Estado externo</label>
+            <select name="ck_outro_estado" class="dark-select">
+              <option value="">Não informado</option>
+              <option value="Sem danos">Sem danos</option>
+              <option value="Arranhado">Arranhado</option>
+              <option value="Amassado">Amassado</option>
+              <option value="Quebrado">Quebrado</option>
+            </select>
+          </div>
+
+          <div style="grid-column:1/-1;">
+            <label>Detalhes / observações</label>
+            <input name="ck_outro_detalhes" placeholder="marca, série, defeito relatado, observações...">
+          </div>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Relato e Diagnóstico</div>
+      </div>
+
+      <div class="form">
+        <div style="grid-column:1/-1;">
+          <label>Relato do cliente</label>
+          <textarea name="relato_cliente" placeholder="Ex: touch para às vezes, celular reinicia, TV sem imagem..."></textarea>
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Diagnóstico técnico (opcional)</label>
+          <textarea name="diagnostico_tecnico" placeholder="Ex: testar conector, avaliar placa, orçamento após análise..."></textarea>
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Valores (opcional)</div>
+        <div class="muted">Se ainda não tiver orçamento, deixa em branco.</div>
+      </div>
+
+      <div class="form">
+        <div>
+          <label>Valor orçado</label>
+          <input name="valor_orcado" placeholder="350,00">
+        </div>
+
+        <div>
+          <label>Valor pago</label>
+          <input name="valor_pago" placeholder="200,00">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Data do pagamento</label>
+          <input name="data_pagamento" placeholder="15/02/2026">
+        </div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="row">
+        <button class="btn btn-green" type="submit">Criar OS</button>
+        <a class="btn btn-ghost" href="{{ url_for('painel') }}">Cancelar</a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+
+<script>
+  const tipo = document.getElementById("tipo_select");
+  const boxCel = document.getElementById("box_celular");
+  const boxPc = document.getElementById("box_pc");
+  const boxTv = document.getElementById("box_tv");
+  const boxGame = document.getElementById("box_game");
+  const boxOutros = document.getElementById("box_outros");
+
+  function hideAll(){
+    [boxCel, boxPc, boxTv, boxGame, boxOutros].forEach(b => b.style.display = "none");
+  }
+
+  function showFor(value){
+    hideAll();
+    if (value === "Celular" || value === "Tablet" || value === "iPhone" || value === "iPad") {
+      boxCel.style.display = "block";
+    } else if (value === "Notebook" || value === "Computador" || value === "All-in-One") {
+      boxPc.style.display = "block";
+    } else if (value === "TV" || value === "Monitor" || value === "Soundbar" || value === "Caixa de Som" || value === "Home Theater") {
+      boxTv.style.display = "block";
+    } else if (value === "Videogame") {
+      boxGame.style.display = "block";
+    } else if (value) {
+      boxOutros.style.display = "block";
+    }
+  }
+
+  tipo.addEventListener("change", (e) => showFor(e.target.value));
+  showFor(tipo.value);
+</script>
+
+{% endblock %} 

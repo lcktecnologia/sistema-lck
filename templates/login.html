@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container">
+  <div class="card" style="margin-top:60px; max-width:520px; margin-left:auto; margin-right:auto;">
+    <h1 style="margin-top:0;">Login</h1>
+
+    <form method="post" action="{{ url_for('login_post') }}">
+      <div class="form">
+        <div>
+          <label>Usuário</label>
+          <input name="usuario" placeholder="Ex: Lucas" required>
+        </div>
+        <div>
+          <label>Senha</label>
+          <input name="senha" type="password" placeholder="••••" required>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px; justify-content:flex-start;">
+        <button class="btn btn-green" type="submit">Entrar</button>
+        <a class="btn btn-ghost" href="{{ url_for('inicio') }}">Voltar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

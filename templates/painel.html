@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:1100px;">
+  <div class="page-head">
+    <div>
+      <div class="hello">Olá, {{ session.usuario }} ({{ session.role }})</div>
+      <h1>Painel</h1>
+    </div>
+
+    <div class="head-actions head-actions-gap">
+      <a class="btn btn-green" href="{{ url_for('os_nova') }}">Criar OS</a>
+      <a class="btn btn-blue" href="{{ url_for('devedores') }}">Devedores</a>
+      <a class="btn btn-ghost" href="{{ url_for('os_finalizadas') }}">OS Finalizadas</a>
+      <a class="btn btn-red" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div class="section" style="margin-top:0;">
+      <div class="count">Ordens abertas ({{ abertas|length }})</div>
+    </div>
+
+    {% if abertas %}
+      <div class="os-grid">
+        {% for o in abertas %}
+          <a class="os-card" href="{{ url_for('os_detalhe', os_id=o.id) }}">
+            <div class="os-top">
+              <div class="os-id">OS #{{ "%04d"|format(o.id) }}</div>
+              <span class="badge {{ STATUS_CLASS.get(o.status, 'st-aberta') }}">
+                {{ STATUS_LABEL.get(o.status, o.status) }}
+              </span>
+            </div>
+
+            <div class="os-cli"><b>{{ o.cliente_nome }}</b> • {{ o.cliente_fone or "-" }}</div>
+            <div class="os-eq">{{ o.tipo }} • {{ o.equipamento }}</div>
+            <div class="os-meta">Entrada: {{ o.data_entrada }}</div>
+            <div class="os-meta">Código: <b>{{ o.codigo_consulta }}</b></div>
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="muted">Nenhuma OS aberta no momento.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %} 

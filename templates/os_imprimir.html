@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container print-paper">
+
+  <div class="no-print" style="display:flex; justify-content:center; gap:10px; margin-bottom:10px;">
+    <button class="btn btn-green" onclick="window.print()">Imprimir</button>
+    <a class="btn btn-ghost" href="{{ url_for('os_detalhe', os_id=os.id) }}">Voltar</a>
+  </div>
+
+  <div class="paper card paper-compact">
+    <div class="paper-head">
+      <div>
+        <div class="paper-brand">LCK Tecnologia</div>
+        <div class="paper-sub">Ordem / Nota de Serviço</div>
+      </div>
+      <div class="paper-right">
+        <div class="paper-os">OS #{{ pad_os(os.id) }}</div>
+        <div class="paper-code">Código: <b>{{ os.codigo_consulta }}</b></div>
+      </div>
+    </div>
+
+    <div class="paper-grid">
+      <div><span>Cliente</span><b>{{ os.cliente_nome }}</b></div>
+      <div><span>Telefone</span><b>{{ os.cliente_fone or "-" }}</b></div>
+      <div><span>Entrada</span><b>{{ os.data_entrada }}</b></div>
+      <div><span>Status</span><b>{{ STATUS_LABEL.get(os.status, os.status) }}</b></div>
+      <div class="full"><span>Equipamento</span><b>{{ os.tipo }} • {{ os.equipamento }}</b></div>
+      <div class="full"><span>Endereço</span><b>{{ os.cliente_endereco or "-" }}</b></div>
+      <div class="full"><span>CPF</span><b>{{ os.cliente_cpf or "-" }}</b></div>
+      <div class="full"><span>E-mail</span><b>{{ os.cliente_email or "-" }}</b></div>
+    </div>
+
+    <div class="paper-2col paper-2col-compact">
+      <div>
+        <div class="paper-h">Relato do cliente</div>
+        <div class="paper-t">{{ os.relato_cliente or "-" }}</div>
+      </div>
+      <div>
+        <div class="paper-h">Diagnóstico técnico</div>
+        <div class="paper-t">{{ os.diagnostico_tecnico or "-" }}</div>
+      </div>
+    </div>
+
+    <div class="paper-check paper-check-compact">
+      <div class="paper-h">Checklist / Condição na entrada</div>
+      <div class="paper-checkgrid paper-checkgrid-compact">
+        {% set any = false %}
+        {% for k,v in checklist.items() %}
+          {% if v %}
+            {% set any = true %}
+            <div><b>{{ CHECKLIST_LABELS.get(k,k) }}:</b> {{ v }}</div>
+          {% endif %}
+        {% endfor %}
+        {% if not any %}
+          <div class="muted">Nenhum item de checklist informado.</div>
+        {% endif %}
+      </div>
+    </div>
+
+    <div class="paper-pay paper-pay-compact">
+      <div><span>Valor orçado</span><b>R$ {{ "%.2f"|format(os.valor_orcado or 0) }}</b></div>
+      <div><span>Valor pago</span><b>R$ {{ "%.2f"|format(os.valor_pago or 0) }}</b></div>
+      <div><span>Data pagamento</span><b>{{ os.data_pagamento or "-" }}</b></div>
+      <div><span>Consulta online</span><b>{{ site_consulta }}</b></div>
+    </div>
+
+    <div class="paper-terms paper-terms-compact">
+      <b>Termos e condições (resumo):</b>
+      <ol>
+        <li><b>Prazo de retirada:</b> após <b>90 dias</b> sem retirada e sem contato, poderá gerar <b>taxa de armazenamento de R$ 40,00/mês</b> (a partir do 91º dia).</li>
+        <li><b>Garantia:</b> serviços e peças possuem garantia de <b>90 dias</b>, limitada ao serviço/peça reparada. Não cobre oxidação, quedas, mau uso, violação por terceiros, variações elétricas ou defeitos não relacionados.</li>
+        <li><b>Dados/backup:</b> é responsabilidade do cliente manter backup. Não nos responsabilizamos por perda de dados decorrente do defeito/atualizações/reparos.</li>
+        <li><b>Consulta online:</b> informe <b>OS</b> + <b>Código</b>. Pode levar alguns segundos conforme a conexão.</li>
+      </ol>
+    </div>
+
+    <div class="paper-sign paper-sign-compact">
+      <div>Assinatura do Cliente</div>
+      <div>Assinatura da Assistência</div>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %} 

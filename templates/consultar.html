@@ -1,0 +1,123 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:860px;">
+  <div class="page-head page-head-pad">
+    <div>
+      <div class="hello">LCK Tecnologia</div>
+      <h1>Consultar Ordem de Serviço</h1>
+      <div class="muted">Digite o número da OS (ex: 0001) e o código do comprovante.</div>
+    </div>
+    <div class="head-actions">
+      <a class="btn btn-ghost" href="{{ url_for('inicio') }}">← Voltar</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <form method="post" action="{{ url_for('consultar_post') }}">
+      <div class="form">
+        <div>
+          <label>Número da OS</label>
+          <input name="os_id" placeholder="0001" required>
+          <div class="hint">Pode digitar 1 ou 0001 (tanto faz).</div>
+        </div>
+
+        <div>
+          <label>Código</label>
+          <input name="codigo" placeholder="A1B2C3" required>
+        </div>
+      </div>
+
+      {% if erro %}
+        <div class="alert">{{ erro }}</div>
+      {% endif %}
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn btn-green" type="submit">Consultar</button>
+      </div>
+    </form>
+  </div>
+
+  {% if resultado %}
+    <div class="card" style="margin-top:16px;">
+      <div class="section" style="margin-top:0;">
+        <div class="count">OS #{{ "%04d"|format(resultado.id) }} • {{ STATUS_LABEL.get(resultado.status, resultado.status) }}</div>
+      </div>
+
+      <div class="os-info">
+        <div><span>Cliente</span><b>{{ resultado.cliente_nome }}</b></div>
+        <div><span>Telefone</span><b>{{ resultado.cliente_fone or "-" }}</b></div>
+        <div class="full"><span>Equipamento</span><b>{{ resultado.tipo }} • {{ resultado.equipamento }}</b></div>
+        <div><span>Entrada</span><b>{{ resultado.data_entrada }}</b></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section" style="margin-top:0;">
+        <div class="count">Valores</div>
+      </div>
+
+      <div class="os-info">
+        <div><span>Valor orçado</span><b>R$ {{ "%.2f"|format(resultado.valor_orcado or 0) }}</b></div>
+        <div><span>Valor pago</span><b>R$ {{ "%.2f"|format(resultado.valor_pago or 0) }}</b></div>
+        <div class="full"><span>Data pagamento</span><b>{{ resultado.data_pagamento or "-" }}</b></div>
+      </div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Relato do cliente</div>
+      </div>
+      <div class="box">{{ resultado.relato_cliente or "-" }}</div>
+
+      <div class="hr"></div>
+
+      <div class="section">
+        <div class="count">Histórico (visível ao cliente)</div>
+      </div>
+
+      <div class="hist">
+        {% for h in historico %}
+          <div class="hist-item {% if loop.first %}hist-latest{% endif %}">
+
+            <div class="hist-top">
+              <div class="hist-top-left">
+                <b>{{ h.acao }}</b>
+              </div>
+
+              <div class="hist-top-right">
+                <span class="muted">{{ h.data }}</span>
+                {% if loop.first %}
+                  <span class="hist-badge">Última atualização</span>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if h.obs %}
+              <div class="hist-obs">{{ h.obs }}</div>
+            {% endif %}
+
+            {% if h.valor_orcado or h.valor_pago or h.data_pagamento %}
+              <div class="hist-values">
+                {% if h.valor_orcado is not none %}
+                  <span><b>Orçado:</b> R$ {{ "%.2f"|format(h.valor_orcado or 0) }}</span>
+                {% endif %}
+                {% if h.valor_pago is not none %}
+                  <span><b>Pago:</b> R$ {{ "%.2f"|format(h.valor_pago or 0) }}</span>
+                {% endif %}
+                {% if h.data_pagamento %}
+                  <span><b>Data pagamento:</b> {{ h.data_pagamento }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+
+          </div>
+        {% else %}
+          <div class="muted">Ainda não há atualizações visíveis.</div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,203 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:1100px;">
+  <div class="page-head">
+    <div>
+      <div class="hello">Olá, {{ session.usuario }} ({{ session.role }})</div>
+      <h1>OS #{{ "%04d"|format(os_row.id) }}</h1>
+    </div>
+
+    <div class="head-actions head-actions-gap">
+      <a class="btn btn-ghost" href="{{ url_for('painel') }}">Menu inicial</a>
+
+      <a class="btn btn-blue" href="{{ url_for('os_devedor_form', os_id=os_row.id) }}">Adicionar como Devedor</a>
+
+      <a class="btn btn-ghost" href="{{ url_for('os_comprovante', os_id=os_row.id) }}">Imprimir Cheque</a>
+      <a class="btn btn-blue" href="{{ url_for('os_imprimir', os_id=os_row.id) }}">Imprimir OS</a>
+
+      {% if session.role == 'admin' %}
+        <form method="post" action="{{ url_for('os_excluir', os_id=os_row.id) }}" style="display:inline;">
+          <button class="btn btn-red" type="submit" onclick="return confirm('Excluir esta OS?')">Excluir OS</button>
+        </form>
+      {% endif %}
+
+      <a class="btn btn-red" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <div class="os-summary">
+      <div class="os-summary-main">
+        <div class="os-s-title">Cliente: <b>{{ os_row.cliente_nome }}</b> • {{ os_row.cliente_fone or "-" }}</div>
+        <div class="os-s-sub">{{ os_row.tipo }} • {{ os_row.equipamento }}</div>
+        <div class="os-s-sub">Entrada: {{ os_row.data_entrada }} • Código: <b>{{ os_row.codigo_consulta }}</b></div>
+      </div>
+      <div>
+        <span class="badge big {{ STATUS_CLASS.get(os_row.status, 'st-aberta') }}">
+          {{ STATUS_LABEL.get(os_row.status, os_row.status) }}
+        </span>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="count">Adicionar atualização (Histórico)</div>
+    </div>
+
+    <form method="post" action="{{ url_for('os_add_historico', os_id=os_row.id) }}">
+      <div class="form">
+        <div>
+          <label>Tipo de atualização</label>
+          <select name="acao" id="acao_sel" class="dark-select">
+            <option value="Observação">Observação</option>
+            <option value="Orçamento concluído">Orçamento concluído</option>
+            <option value="Cliente informado">Cliente informado</option>
+            <option value="Aguardando aprovação">Aguardando aprovação</option>
+            <option value="Aprovado pelo cliente">Aprovado pelo cliente</option>
+            <option value="Serviço em execução">Serviço em execução</option>
+            <option value="Pagamento registrado">Pagamento registrado</option>
+            <option value="Finalizado">Finalizado</option>
+            <option value="Sem conserto">Sem conserto</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Visível ao cliente?</label>
+          <select name="visivel_cliente" class="dark-select">
+            <option value="1">Sim (cliente verá na consulta)</option>
+            <option value="0">Não (somente interno)</option>
+          </select>
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Descrição / observação</label>
+          <textarea name="obs" placeholder="Ex: Orçamento R$ 250,00. Troca do conector de carga."></textarea>
+        </div>
+
+        <div>
+          <label>Status (se quiser mudar)</label>
+          <select name="novo_status" id="status_sel" class="dark-select">
+            <option value="">(manter)</option>
+            <option value="aberta">Aberta</option>
+            <option value="aguardando orçamento">Aguardando orçamento</option>
+            <option value="aguardando aprovação">Aguardando aprovação</option>
+            <option value="em execução">Serviço em execução</option>
+            <option value="fechada">Finalizado</option>
+            <option value="sem conserto">Sem conserto</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Valor orçado (opcional)</label>
+          <input name="valor_orcado" placeholder="Ex: 250,00">
+        </div>
+
+        <div>
+          <label>Valor pago (opcional)</label>
+          <input name="valor_pago" placeholder="Ex: 100,00">
+        </div>
+
+        <div>
+          <label>Data do pagamento (opcional)</label>
+          <input name="data_pagamento" placeholder="15/02/2026">
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:10px;">
+        <button class="btn btn-green" type="submit">Salvar atualização</button>
+      </div>
+    </form>
+
+    <div class="hr"></div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="count">Relato e diagnóstico</div>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <div class="muted">Relato do cliente</div>
+        <div class="box">{{ os_row.relato_cliente or "-" }}</div>
+      </div>
+      <div>
+        <div class="muted">Diagnóstico técnico</div>
+        <div class="box">{{ os_row.diagnostico_tecnico or "-" }}</div>
+      </div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="count">Checklist (condição na entrada)</div>
+    </div>
+
+    <div class="box">
+      {% set any = false %}
+      {% for k,v in checklist.items() %}
+        {% if v %}
+          {% set any = true %}
+          <div class="ck-line">
+            <b>{{ CHECKLIST_LABELS.get(k, k) }}:</b> {{ v }}
+          </div>
+        {% endif %}
+      {% endfor %}
+      {% if not any %}
+        <div class="muted">Nenhum item de checklist informado.</div>
+      {% endif %}
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="count">Valores</div>
+    </div>
+
+    <div class="os-info">
+      <div><span>Valor orçado</span><b>R$ {{ "%.2f"|format(os_row.valor_orcado or 0) }}</b></div>
+      <div><span>Valor pago</span><b>R$ {{ "%.2f"|format(os_row.valor_pago or 0) }}</b></div>
+      <div><span>Data pagamento</span><b>{{ os_row.data_pagamento or "-" }}</b></div>
+      <div><span>Status atual</span><b>{{ STATUS_LABEL.get(os_row.status, os_row.status) }}</b></div>
+    </div>
+
+    <div class="hr"></div>
+
+    <div class="section" style="margin-top:0;">
+      <div class="count">Histórico</div>
+    </div>
+
+    <div class="hist">
+      {% for h in historico %}
+        <div class="hist-item">
+          <div class="hist-top">
+            <b>{{ h.acao }}</b>
+            <span class="muted">{{ h.data }}</span>
+          </div>
+          {% if h.obs %}
+            <div class="hist-obs">{{ h.obs }}</div>
+          {% endif %}
+
+          <div class="hist-mini">
+            {% if h.visivel_cliente == 1 %}
+              <span class="pill ok">Visível ao cliente</span>
+            {% else %}
+              <span class="pill off">Interno</span>
+            {% endif %}
+
+            {% if session.role == 'admin' %}
+              <form method="post" action="{{ url_for('historico_excluir', hist_id=h.id) }}" style="display:inline;">
+                <button class="pill del" type="submit" onclick="return confirm('Excluir este registro?')">Excluir</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="muted">Sem histórico ainda.</div>
+      {% endfor %}
+    </div>
+
+  </div>
+</div>
+
+{% endblock %} 

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:900px;">
+  <div class="page-head">
+    <div>
+      <div class="hello">Olá, {{ session.usuario }} ({{ session.role }})</div>
+      <h1>Novo Devedor</h1>
+      <div class="muted">Preencha os dados e salve.</div>
+    </div>
+
+    <div class="head-actions head-actions-gap">
+      <a class="btn btn-ghost" href="{{ url_for('devedores') }}">Voltar</a>
+      <a class="btn btn-red" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    <form method="post" action="{% if from_os_id %}{{ url_for('os_devedor_post', os_id=from_os_id) }}{% else %}{{ url_for('devedores_novo_post') }}{% endif %}">
+      <div class="form">
+        <div>
+          <label>Nome do cliente</label>
+          <input name="cliente_nome" required value="{{ prefill.cliente_nome if prefill else '' }}">
+        </div>
+
+        <div>
+          <label>Telefone</label>
+          <input name="cliente_fone" value="{{ prefill.cliente_fone if prefill else '' }}" placeholder="(55) 99999-9999">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Referência</label>
+          <input name="referencia" value="{{ prefill.referencia if prefill else '' }}" placeholder="Ex: OS #0004, venda, etc.">
+        </div>
+
+        <div>
+          <label>Valor devido</label>
+          <input name="valor" value="{{ prefill.valor if prefill else '' }}" placeholder="Ex: 120,00">
+        </div>
+
+        <div style="grid-column:1/-1;">
+          <label>Observações</label>
+          <textarea name="obs" placeholder="Ex: ficou faltando pagar a diferença...">{{ prefill.obs if prefill else '' }}</textarea>
+        </div>
+      </div>
+
+      <div class="row" style="margin-top:12px;">
+        <button class="btn btn-green" type="submit">Salvar</button>
+        <a class="btn btn-ghost" href="{{ url_for('devedores') }}">Cancelar</a>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %} 

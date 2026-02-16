@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container" style="max-width:1100px;">
+  <div class="page-head">
+    <div>
+      <div class="hello">Olá, {{ session.usuario }} ({{ session.role }})</div>
+      <h1>Devedores</h1>
+      <div class="muted">Controle de clientes com valores pendentes.</div>
+    </div>
+
+    <div class="head-actions head-actions-gap">
+      <a class="btn btn-green" href="{{ url_for('devedores_novo') }}">Novo devedor</a>
+      <a class="btn btn-ghost" href="{{ url_for('painel') }}">Menu inicial</a>
+      <a class="btn btn-red" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:18px;">
+    {% if rows %}
+      <div class="dev-grid">
+        {% for d in rows %}
+          <div class="dev-card {% if d.status == 'pago' %}dev-paid{% else %}dev-open{% endif %}">
+            <div class="dev-top">
+              <div class="dev-name"><b>{{ d.cliente_nome }}</b></div>
+              <span class="badge {% if d.status=='pago' %}st-fechada{% else %}st-sem{% endif %}">
+                {{ 'Pago' if d.status=='pago' else 'Em aberto' }}
+              </span>
+            </div>
+
+            <div class="dev-line muted">Telefone: <b class="text-strong">{{ d.cliente_fone or '-' }}</b></div>
+            <div class="dev-line muted">Referência: <b class="text-strong">{{ d.referencia or '-' }}</b></div>
+            <div class="dev-line muted">Criado em: <b class="text-strong">{{ d.criado_em }}</b></div>
+
+            <div class="dev-value">
+              <span>Valor</span>
+              <b>R$ {{ "%.2f"|format(d.valor or 0) }}</b>
+            </div>
+
+            {% if d.obs %}
+              <div class="dev-obs">{{ d.obs }}</div>
+            {% endif %}
+
+            {% if d.status == 'pago' %}
+              <div class="muted" style="margin-top:10px;">Pago em: <b class="text-strong">{{ d.pago_em }}</b></div>
+            {% endif %}
+
+            <div class="dev-actions">
+              {% if d.status != 'pago' %}
+                <form method="post" action="{{ url_for('devedor_marcar_pago', dev_id=d.id) }}">
+                  <button class="btn btn-green" type="submit">Marcar como pago</button>
+                </form>
+              {% else %}
+                <form method="post" action="{{ url_for('devedor_reabrir', dev_id=d.id) }}">
+                  <button class="btn btn-ghost" type="submit">Reabrir</button>
+                </form>
+              {% endif %}
+
+              {% if session.role == 'admin' %}
+                <form method="post" action="{{ url_for('devedor_excluir', dev_id=d.id) }}">
+                  <button class="btn btn-red" type="submit" onclick="return confirm('Excluir este devedor?')">Excluir</button>
+                </form>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="muted">Nenhum devedor cadastrado.</div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %} 

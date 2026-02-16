@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container print-wrap">
+
+  <div class="no-print print-actions" style="justify-content:center;">
+    <button class="btn btn-green" onclick="window.print()">Imprimir</button>
+    <a class="btn btn-ghost" href="{{ url_for('os_detalhe', os_id=os.id) }}">Voltar</a>
+  </div>
+
+  <div class="ticket-strip ticket-compact">
+    <div class="t-head">
+      <div>
+        <div class="t-title">LCK Tecnologia</div>
+        <div class="t-sub">Comprovante de Entrada</div>
+      </div>
+      <div class="t-os">OS #{{ pad_os(os.id) }}</div>
+    </div>
+
+    <div class="t-grid">
+      <div><span>Cliente</span><b>{{ os.cliente_nome }}</b></div>
+      <div><span>Telefone</span><b>{{ os.cliente_fone or "-" }}</b></div>
+
+      <div class="full"><span>Equipamento</span><b>{{ os.tipo }} • {{ os.equipamento }}</b></div>
+
+      <div><span>Entrada</span><b>{{ os.data_entrada }}</b></div>
+      <div><span>Código</span><b>{{ os.codigo_consulta }}</b></div>
+      <div><span>Orçamento</span><b>R$ {{ "%.2f"|format(os.valor_orcado or 0) }}</b></div>
+    </div>
+
+    <div class="t-note">
+      <b>Consulta online:</b> acesse <b>{{ site_consulta }}</b> e informe <b>OS + Código</b>.
+    </div>
+
+    <div class="t-tiny">
+      <b>Armazenamento:</b> não retirado em até <b>90 dias</b> poderá gerar <b>taxa de R$ 40,00/mês</b> (a partir do 91º dia).
+    </div>
+  </div>
+
+</div>
+
+{% endblock %} 

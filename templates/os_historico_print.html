@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="utf-8">
+  <title>Histórico {{ os_row["numero_os"] }}</title>
+  <style>
+    body{font-family:Arial, sans-serif; margin:24px}
+    h2{margin:0 0 10px}
+    table{width:100%; border-collapse:collapse; font-size:12px}
+    th,td{border-bottom:1px solid #ddd; padding:8px; text-align:left; vertical-align:top}
+    th{background:#f2f2f2}
+  </style>
+</head>
+<body>
+  <h2>LCK Tecnologia — Histórico da OS {{ os_row["numero_os"] }}</h2>
+  <p><b>Cliente:</b> {{ os_row["cliente_nome"] }} • {{ os_row["cliente_telefone"] }}</p>
+  <p><b>Equipamento:</b> {{ os_row["equipamento_tipo"] }} • IMEI: {{ os_row["equip_imei"] or "-" }}</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Data/Hora</th>
+        <th>Evento</th>
+        <th>Descrição</th>
+        <th>Usuário</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for h in historico %}
+      <tr>
+        <td>{{ h["dt"] }}</td>
+        <td>{{ h["evento"] }}</td>
+        <td>{{ h["descricao"] }}</td>
+        <td>{{ h["usuario"] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+  <script>window.print()</script>
+</body>
+</html>
