@@ -17,18 +17,18 @@ app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "troque-essa-chave-por-algo-seu-123")
 
 # =========================
+# CONFIG
+# =========================
+DATABASE_URL = (os.environ.get("DATABASE_URL") or "").strip()
+SITE_CONSULTA = os.environ.get("SITE_CONSULTA", "https://sistema-lck.onrender.com/").strip()
+
+# =========================
 # DB (Postgres / Neon)
 # =========================
-DATABASE_URL = os.environ.get("DATABASE_URL", "").strip()
-
 def get_db():
-    """
-    Abre conexão Postgres usando DATABASE_URL do Render/Neon
-    """
     if not DATABASE_URL:
         raise RuntimeError("DATABASE_URL não configurada no Render.")
-    conn = psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
-    return conn
+    return psycopg2.connect(DATABASE_URL, cursor_factory=RealDictCursor)
 
 def now_str():
     return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -37,7 +37,6 @@ def ensure_tables():
     conn = get_db()
     cur = conn.cursor()
 
-    # usuarios
     cur.execute("""
     CREATE TABLE IF NOT EXISTS usuarios (
         id SERIAL PRIMARY KEY,
@@ -47,7 +46,6 @@ def ensure_tables():
     );
     """)
 
-    # os
     cur.execute("""
     CREATE TABLE IF NOT EXISTS os (
         id SERIAL PRIMARY KEY,
@@ -75,7 +73,6 @@ def ensure_tables():
     );
     """)
 
-    # historico
     cur.execute("""
     CREATE TABLE IF NOT EXISTS os_historico (
         id SERIAL PRIMARY KEY,
@@ -91,7 +88,6 @@ def ensure_tables():
     );
     """)
 
-    # devedores
     cur.execute("""
     CREATE TABLE IF NOT EXISTS devedores (
         id SERIAL PRIMARY KEY,
@@ -106,7 +102,6 @@ def ensure_tables():
     );
     """)
 
-    # usuários fixos (sempre)
     def upsert_user(usuario, senha, role):
         cur.execute("""
             INSERT INTO usuarios (usuario, senha, role)
@@ -115,6 +110,7 @@ def ensure_tables():
             DO UPDATE SET senha = EXCLUDED.senha, role = EXCLUDED.role;
         """, (usuario, senha, role))
 
+    # usuários fixos
     upsert_user("Lucas", "0904", "admin")
     upsert_user("Carol", "2858", "admin")
     upsert_user("Natan", "0000", "user")
@@ -125,7 +121,7 @@ def ensure_tables():
 
 @app.before_request
 def startup():
-    # roda 1x por instância (seguro no Postgres também)
+    # roda 1x por instância
     if not getattr(app, "_db_ready", False):
         ensure_tables()
         app._db_ready = True
@@ -163,8 +159,7 @@ def gen_codigo_consulta(conn) -> str:
     while True:
         code = "".join(random.choices(string.ascii_uppercase + string.digits, k=6))
         cur.execute("SELECT 1 FROM os WHERE codigo_consulta = %s", (code,))
-        exists = cur.fetchone()
-        if not exists:
+        if not cur.fetchone():
             return code
 
 STATUS_LABEL = {
@@ -175,7 +170,6 @@ STATUS_LABEL = {
     "fechada": "Finalizado",
     "sem conserto": "Sem conserto",
 }
-
 STATUS_CLASS = {
     "aberta": "st-aberta",
     "aguardando orçamento": "st-orc",
@@ -257,7 +251,8 @@ def inject_helpers():
         pad_os=pad_os,
         STATUS_LABEL=STATUS_LABEL,
         STATUS_CLASS=STATUS_CLASS,
-        CHECKLIST_LABELS=CHECKLIST_LABELS
+        CHECKLIST_LABELS=CHECKLIST_LABELS,
+        site_consulta=SITE_CONSULTA
     )
 
 # =========================
@@ -383,9 +378,7 @@ def devedores():
     cur = conn.cursor()
     cur.execute("""
         SELECT * FROM devedores
-        ORDER BY
-          CASE WHEN status='em aberto' THEN 0 ELSE 1 END,
-          id DESC
+        ORDER BY CASE WHEN status='em aberto' THEN 0 ELSE 1 END, id DESC
     """)
     rows = cur.fetchall()
     conn.close()
@@ -455,7 +448,7 @@ def devedor_excluir(dev_id):
     flash("Devedor excluído.", "ok")
     return redirect(url_for("devedores"))
 
-# dentro da OS → criar devedor preenchido
+# botão dentro da OS: criar devedor preenchido
 @app.get("/os/<int:os_id>/devedor")
 @login_required
 def os_devedor_form(os_id):
@@ -464,6 +457,7 @@ def os_devedor_form(os_id):
     cur.execute("SELECT * FROM os WHERE id=%s", (os_id,))
     o = cur.fetchone()
     conn.close()
+
     if not o:
         abort(404)
 
@@ -506,7 +500,8 @@ def os_devedor_post(os_id):
     cur.execute("""
         INSERT INTO os_historico (os_id, data, acao, obs, visivel_cliente)
         VALUES (%s, %s, %s, %s, 0)
-    """, (os_id, now_str(), "Devedor registrado", f"Devedor criado: {cliente_nome} • R$ {valor:.2f} • {referencia}"))
+    """, (os_id, now_str(), "Devedor registrado",
+          f"Devedor criado: {cliente_nome} • R$ {valor:.2f} • {referencia}"))
 
     conn.commit()
     conn.close()
@@ -588,9 +583,9 @@ def os_nova_post():
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
     """, (
         os_id, now_str(), "OS criada", "Entrada registrada no sistema.", 1,
-        (valor_orcado if valor_orcado else None),
-        (valor_pago if valor_pago else None),
-        (data_pagamento if data_pagamento else None)
+        (valor_orcado if request.form.get("valor_orcado") else None),
+        (valor_pago if request.form.get("valor_pago") else None),
+        (data_pagamento if request.form.get("data_pagamento") else None)
     ))
 
     conn.commit()
@@ -619,6 +614,7 @@ def os_detalhe(os_id):
         ORDER BY id DESC
     """, (os_id,))
     hist = cur.fetchall()
+
     conn.close()
 
     checklist = {}
@@ -627,12 +623,7 @@ def os_detalhe(os_id):
     except Exception:
         checklist = {}
 
-    return render_template(
-        "os_detalhe.html",
-        os_row=os_row,
-        historico=hist,
-        checklist=checklist
-    )
+    return render_template("os_detalhe.html", os_row=os_row, historico=hist, checklist=checklist)
 
 @app.post("/os/<int:os_id>/historico")
 @login_required
@@ -653,27 +644,22 @@ def os_add_historico(os_id):
     conn = get_db()
     cur = conn.cursor()
 
-    # pega valores atuais
-    cur.execute("SELECT valor_orcado, valor_pago, data_pagamento FROM os WHERE id=%s", (os_id,))
-    atual = cur.fetchone()
-    if not atual:
-        conn.close()
-        abort(404)
-
-    # aplica update na OS se veio algo
+    # atualiza OS (somente campos enviados)
     fields = []
     values = []
+
     if novo_status:
         fields.append("status=%s")
         values.append(novo_status)
 
-    # se usuário preencheu, atualiza. (se deixou vazio, não mexe)
     if request.form.get("valor_orcado") not in (None, ""):
         fields.append("valor_orcado=%s")
         values.append(valor_orcado)
+
     if request.form.get("valor_pago") not in (None, ""):
         fields.append("valor_pago=%s")
         values.append(valor_pago)
+
     if request.form.get("data_pagamento") not in (None, ""):
         fields.append("data_pagamento=%s")
         values.append(data_pagamento)
@@ -682,10 +668,12 @@ def os_add_historico(os_id):
         values.append(os_id)
         cur.execute(f"UPDATE os SET {', '.join(fields)} WHERE id=%s", tuple(values))
 
-    # snapshot (o que vai aparecer pro cliente no histórico)
-    # pega de novo após update
+    # snapshot pós update
     cur.execute("SELECT valor_orcado, valor_pago, data_pagamento FROM os WHERE id=%s", (os_id,))
     after = cur.fetchone()
+    if not after:
+        conn.close()
+        abort(404)
 
     cur.execute("""
         INSERT INTO os_historico (os_id, data, acao, obs, visivel_cliente, valor_orcado, valor_pago, data_pagamento)
@@ -701,4 +689,56 @@ def os_add_historico(os_id):
     conn.close()
 
     flash("Atualização registrada.", "ok")
-    return redirect(url_for("os_detalhe", os_id=os_id)) 
+    return redirect(url_for("os_detalhe", os_id=os_id))
+
+# =========================
+# IMPRESSÃO (isso resolve seu BuildError)
+# =========================
+
+# ✅ ESTE É O ENDPOINT QUE O SEU TEMPLATE ESTÁ CHAMANDO
+@app.get("/os/<int:os_id>/comprovante")
+@login_required
+def os_comprovante(os_id):
+    conn = get_db()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM os WHERE id=%s", (os_id,))
+    os_row = cur.fetchone()
+    conn.close()
+
+    if not os_row:
+        abort(404)
+
+    # seu template usa variável "os" e "site_consulta"
+    return render_template("comprovante.html", os=os_row, site_consulta=SITE_CONSULTA)
+
+# Imprimir OS completa (se seu botão existir no template)
+@app.get("/os/<int:os_id>/imprimir")
+@login_required
+def os_imprimir(os_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    cur.execute("SELECT * FROM os WHERE id=%s", (os_id,))
+    os_row = cur.fetchone()
+    if not os_row:
+        conn.close()
+        abort(404)
+
+    cur.execute("SELECT * FROM os_historico WHERE os_id=%s ORDER BY id DESC", (os_id,))
+    hist = cur.fetchall()
+    conn.close()
+
+    checklist = {}
+    try:
+        checklist = json.loads(os_row.get("checklist_json") or "{}")
+    except Exception:
+        checklist = {}
+
+    # ajuste: aqui eu chamei de os_row/checklist/historico igual ao detalhe
+    return render_template("os_imprimir.html", os_row=os_row, checklist=checklist, historico=hist, site_consulta=SITE_CONSULTA)
+
+# =========================
+# Run local
+# =========================
+if __name__ == "__main__":
+    app.run(debug=True) 
