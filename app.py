@@ -691,6 +691,33 @@ def os_add_historico(os_id):
     flash("Atualização registrada.", "ok")
     return redirect(url_for("os_detalhe", os_id=os_id))
 
+@app.post("/historico/<int:hist_id>/excluir")
+@login_required
+@admin_required
+def historico_excluir(hist_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    # descobre qual OS pertence
+    cur.execute("SELECT os_id FROM os_historico WHERE id=%s", (hist_id,))
+    row = cur.fetchone()
+
+    if not row:
+        conn.close()
+        abort(404)
+
+    os_id = row["os_id"]
+
+    # exclui o registro do histórico
+    cur.execute("DELETE FROM os_historico WHERE id=%s", (hist_id,))
+    conn.commit()
+    conn.close()
+
+    flash("Histórico excluído.", "ok")
+    return redirect(url_for("os_detalhe", os_id=os_id)) 
+
+
+
 # =========================
 # IMPRESSÃO (isso resolve seu BuildError)
 # =========================
