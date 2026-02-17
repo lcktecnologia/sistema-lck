@@ -736,6 +736,25 @@ def os_imprimir(os_id):
 
     # ajuste: aqui eu chamei de os_row/checklist/historico igual ao detalhe
     return render_template("os_imprimir.html", os_row=os_row, checklist=checklist, historico=hist, site_consulta=SITE_CONSULTA)
+# =========================
+# EXCLUIR OS
+# =========================
+@app.post("/os/<int:os_id>/excluir")
+@login_required
+@admin_required
+def os_excluir(os_id):
+    conn = get_db()
+    cur = conn.cursor()
+
+    # apaga histórico primeiro
+    cur.execute("DELETE FROM os_historico WHERE os_id=%s", (os_id,))
+    cur.execute("DELETE FROM os WHERE id=%s", (os_id,))
+
+    conn.commit()
+    conn.close()
+
+    flash("OS excluída com sucesso.", "ok")
+    return redirect(url_for("painel"))
 
 # =========================
 # Run local
