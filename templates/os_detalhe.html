@@ -105,8 +105,16 @@
         </div>
       </div>
 
-      <div class="row" style="margin-top:10px;">
+      <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-green" type="submit">Salvar atualização</button>
+
+        <a
+          class="btn btn-blue"
+          target="_blank"
+          href="https://wa.me/55{{ (os_row.cliente_fone or '') | replace(' ', '') | replace('-', '') | replace('(', '') | replace(')', '') | replace('+', '') }}?text=Ol%C3%A1%20{{ (os_row.cliente_nome or '') | urlencode }}%0A%0AAtualiza%C3%A7%C3%A3o%20da%20sua%20Ordem%20de%20Servi%C3%A7o%20%23{{ '%04d'|format(os_row.id) }}%0A%0AEquipamento%3A%20{{ (os_row.equipamento or '-') | urlencode }}%0AStatus%3A%20{{ STATUS_LABEL.get(os_row.status, os_row.status) | urlencode }}%0A%0AVoc%C3%AA%20pode%20acompanhar%20aqui%3A%0A{{ site_consulta | urlencode }}"
+        >
+          Enviar mensagem WhatsApp
+        </a>
       </div>
     </form>
 
@@ -200,4 +208,4 @@
   </div>
 </div>
 
-{% endblock %} 
+{% endblock %}
