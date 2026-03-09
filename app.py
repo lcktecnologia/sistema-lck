@@ -714,15 +714,12 @@ def historico_excluir(hist_id):
     conn.close()
 
     flash("Histórico excluído.", "ok")
-    return redirect(url_for("os_detalhe", os_id=os_id)) 
-
-
+    return redirect(url_for("os_detalhe", os_id=os_id))
 
 # =========================
-# IMPRESSÃO (isso resolve seu BuildError)
+# IMPRESSÃO
 # =========================
 
-# ✅ ESTE É O ENDPOINT QUE O SEU TEMPLATE ESTÁ CHAMANDO
 @app.get("/os/<int:os_id>/comprovante")
 @login_required
 def os_comprovante(os_id):
@@ -735,10 +732,9 @@ def os_comprovante(os_id):
     if not os_row:
         abort(404)
 
-    # seu template usa variável "os" e "site_consulta"
-    return render_template("comprovante.html", os=os_row, site_consulta=SITE_CONSULTA)
+    # Se o arquivo no templates for os_comprovante.html, use esse nome abaixo.
+    return render_template("os_comprovante.html", os=os_row, site_consulta=SITE_CONSULTA)
 
-# Imprimir OS completa (se seu botão existir no template)
 @app.get("/os/<int:os_id>/imprimir")
 @login_required
 def os_imprimir(os_id):
@@ -761,8 +757,14 @@ def os_imprimir(os_id):
     except Exception:
         checklist = {}
 
-    # ajuste: aqui eu chamei de os_row/checklist/historico igual ao detalhe
-    return render_template("os_imprimir.html", os_row=os_row, checklist=checklist, historico=hist, site_consulta=SITE_CONSULTA)
+    return render_template(
+        "os_imprimir.html",
+        os=os_row,
+        checklist=checklist,
+        historico=hist,
+        site_consulta=SITE_CONSULTA
+    )
+
 # =========================
 # EXCLUIR OS
 # =========================
@@ -787,4 +789,4 @@ def os_excluir(os_id):
 # Run local
 # =========================
 if __name__ == "__main__":
-    app.run(debug=True) 
+    app.run(debug=True)
