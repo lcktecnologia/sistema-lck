@@ -105,8 +105,61 @@
         </div>
       </div>
 
-      {% set ultima_acao = historico[0].acao if historico and historico[0].acao else STATUS_LABEL.get(os_row.status, os_row.status) %}
-      {% set ultima_obs = historico[0].obs if historico and historico[0].obs else 'Sem descrição informada.' %}
+      {% set fone_limpo = (os_row.cliente_fone or '') | replace(' ', '') | replace('-', '') | replace('(', '') | replace(')', '') | replace('+', '') %}
+      {% set texto_whatsapp %}
+Olá {{ os_row.cliente_nome or '-' }}
+
+Segue sua Ordem de Serviço:
+
+OS #{{ "%04d"|format(os_row.id) }}
+Código de consulta: {{ os_row.codigo_consulta or '-' }}
+
+Cliente: {{ os_row.cliente_nome or '-' }}
+Telefone: {{ os_row.cliente_fone or '-' }}
+Entrada: {{ os_row.data_entrada or '-' }}
+Status: {{ STATUS_LABEL.get(os_row.status, os_row.status) }}
+
+Equipamento:
+{{ os_row.tipo or '-' }} • {{ os_row.equipamento or '-' }}
+
+Endereço:
+{{ os_row.cliente_endereco or '-' }}
+
+CPF:
+{{ os_row.cliente_cpf or '-' }}
+
+E-mail:
+{{ os_row.cliente_email or '-' }}
+
+Relato do cliente:
+{{ os_row.relato_cliente or '-' }}
+
+Diagnóstico técnico:
+{{ os_row.diagnostico_tecnico or '-' }}
+
+Checklist / condição na entrada:
+{% for k, v in checklist.items() if v %}
+- {{ CHECKLIST_LABELS.get(k, k) }}: {{ v }}
+{% else %}
+Nenhum item de checklist informado.
+{% endfor %}
+
+Valores:
+Valor orçado: R$ {{ "%.2f"|format(os_row.valor_orcado or 0) }}
+Valor pago: R$ {{ "%.2f"|format(os_row.valor_pago or 0) }}
+Data pagamento: {{ os_row.data_pagamento or '-' }}
+
+Termos e condições (resumo):
+1. Prazo de retirada: após 90 dias sem retirada e sem contato, poderá gerar taxa de armazenamento de R$ 40,00 por mês (a partir do 91º dia).
+2. Garantia: serviços e peças possuem garantia de 90 dias, limitada ao serviço/peça reparada. Não cobre oxidação, quedas, mau uso, violação por terceiros, variações elétricas ou defeitos não relacionados.
+3. Dados/backup: é responsabilidade do cliente manter backup. Não nos responsabilizamos por perda de dados decorrente do defeito, atualizações ou reparos.
+4. Consulta online: informe o número da OS e o código de consulta.
+
+Acompanhe sua OS em:
+{{ site_consulta }}
+
+LCK Tecnologia
+      {% endset %}
 
       <div class="row" style="margin-top:10px; gap:10px; flex-wrap:wrap;">
         <button class="btn btn-green" type="submit">Salvar atualização</button>
@@ -114,7 +167,7 @@
         <a
           class="btn btn-blue"
           target="_blank"
-          href="https://wa.me/55{{ (os_row.cliente_fone or '') | replace(' ', '') | replace('-', '') | replace('(', '') | replace(')', '') | replace('+', '') }}?text=Ol%C3%A1%20{{ (os_row.cliente_nome or '') | urlencode }}%0A%0AAtualiza%C3%A7%C3%A3o%20da%20sua%20Ordem%20de%20Servi%C3%A7o%20%23{{ '%04d'|format(os_row.id) }}%0A%0AEquipamento%3A%20{{ (os_row.equipamento or '-') | urlencode }}%0AStatus%20atual%3A%20{{ STATUS_LABEL.get(os_row.status, os_row.status) | urlencode }}%0A%C3%9Altima%20atualiza%C3%A7%C3%A3o%3A%20{{ ultima_acao | urlencode }}%0A%0ADescri%C3%A7%C3%A3o%20t%C3%A9cnica%3A%0A{{ ultima_obs | urlencode }}%0A%0AN%C3%BAmero%20da%20OS%3A%20{{ '%04d'|format(os_row.id) }}%0AC%C3%B3digo%20de%20consulta%3A%20{{ (os_row.codigo_consulta or '-') | urlencode }}%0A%0AVoc%C3%AA%20pode%20acompanhar%20aqui%3A%0A{{ site_consulta | urlencode }}"
+          href="https://wa.me/55{{ fone_limpo }}?text={{ texto_whatsapp | urlencode }}"
         >
           Enviar mensagem WhatsApp
         </a>
